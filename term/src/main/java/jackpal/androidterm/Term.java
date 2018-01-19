@@ -16,6 +16,7 @@
 
 package jackpal.androidterm;
 
+import android.content.res.AssetManager;
 import android.text.TextUtils;
 import jackpal.androidterm.compat.ActionBarCompat;
 import jackpal.androidterm.compat.ActivityCompat;
@@ -30,7 +31,10 @@ import jackpal.androidterm.emulatorview.compat.KeycodeConstants;
 import jackpal.androidterm.util.SessionList;
 import jackpal.androidterm.util.TermSettings;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.List;
@@ -322,6 +326,84 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         }
     };
 
+    /**
+     * Copy file from asset directory to /data/data/com.oevdi.client directory
+     * @param fileName
+     * @return
+     */
+    public  void copyFromAssetToData(String fileName){
+        StringBuilder stringBuilder = new StringBuilder("/data/data/");
+        stringBuilder.append( getPackageName())
+                .append(File.separator)
+                .append(fileName);
+        File destFile = new File(stringBuilder.toString());
+
+        if(destFile.exists()) {
+            destFile.delete();
+        }
+
+        AssetManager.AssetInputStream src = null;
+        FileOutputStream dest = null;
+
+        try {
+            InputStream inputStream =  getAssets() .open(fileName);
+            if(inputStream instanceof AssetManager.AssetInputStream) {
+                src = (AssetManager.AssetInputStream) inputStream;
+            } else {
+                throw new Exception("file is not a AssetInputStream");
+            }
+
+            dest = new FileOutputStream(destFile);
+            byte[] buf = new byte[8192];
+            int len = -1;
+            while((len = src.read(buf)) != -1) {
+                dest.write(buf, 0, len);
+            }
+
+            destFile.setWritable(true);
+            destFile.setExecutable(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(src != null) {
+                try {
+                    src.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(dest != null) {
+                try {
+                    dest.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /*   ========= ash.c ==========
+    #include <stdio.h>
+    int main(int argc, char** argv)
+    {
+        char user[16];
+        char pass[16];
+        do{
+            printf("=> Terminal Shell\n");
+            printf("login:");
+            scanf("%10s",user);
+            printf("password:");
+            scanf("%10s",pass);
+            printf("Invalid user/password.\n");
+        }while(strcmp(user, "root") || strcmp(pass, "oseasy"));
+        system("/system/bin/sh");
+        printf("quit.\n");
+        return 0;
+    }
+    * */
+
     private Handler mHandler = new Handler();
 
     @Override
@@ -329,6 +411,8 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         super.onCreate(icicle);
 
         Log.v(TermDebug.LOG_TAG, "onCreate");
+
+        copyFromAssetToData("ash");
 
         mPrivateAlias = new ComponentName(this, RemoteInterface.PRIVACT_ACTIVITY_ALIAS);
 
