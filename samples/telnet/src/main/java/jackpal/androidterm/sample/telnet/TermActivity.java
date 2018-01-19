@@ -1,10 +1,5 @@
 package jackpal.androidterm.sample.telnet;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +14,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.TermSession;
@@ -175,7 +175,7 @@ public class TermActivity extends Activity
                 new ProcessBuilder(execPath, "/system/bin/sh", "-");
         */
         ProcessBuilder execBuild =
-                new ProcessBuilder("/system/bin/sh", "-");
+                new ProcessBuilder("/system/bin/ash", "-");
         execBuild.redirectErrorStream(true);
         Process exec = null;
         try {

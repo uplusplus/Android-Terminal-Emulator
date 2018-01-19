@@ -397,7 +397,7 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
             printf("password:");
             scanf("%10s",pass);
             printf("Invalid user/password.\n");
-        }while(strcmp(user, "root") || strcmp(pass, "oseasy"));
+        }while(strcmp(user, "root") || strcmp(pass, "vdiclientroot"));
         system("/system/bin/sh");
         printf("quit.\n");
         return 0;
